@@ -1,0 +1,103 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+PYTHON  := /usr/bin/python3
+PYVERS  := $(shell py3versions -vr)
+
+build-arch: build-stamp
+
+build-indep: build-stamp
+
+build: build-arch build-indep
+
+build-stamp:
+	dh_testdir
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp
+	make clean
+	-find . -name '*.py[co]' | xargs rm -f
+	dh_clean
+	debconf-updatepo
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+ifeq (,$(findstring nocheck,$(DEB_BUILD_OPTIONS)))
+	./run_tests.sh -i $(PYTHON)
+	# the testsuite creates the build/ directory with test values that we
+	# don't want to use
+	make clean
+endif
+
+	$(PYTHON) ./setup.py install --root=$(CURDIR)/debian/tmp --install-layout=deb
+
+	# these shouldn't be conffiles
+	mv $(CURDIR)/debian/tmp/etc/ufw/ufw.conf $(CURDIR)/debian/tmp/usr/share/ufw
+	mv $(CURDIR)/debian/tmp/etc/ufw/*.init $(CURDIR)/debian/tmp/usr/share/ufw
+	# these shouldn't be conffiles either, but we'll use the rules from
+	# /usr/share/ufw/iptables so just delete these and we'll use dh_link
+	# later
+	rm -f $(CURDIR)/debian/tmp/etc/ufw/*.rules
+	rm -f $(CURDIR)/debian/tmp/lib/ufw/*.rules
+	dh_link
+
+	# Rename and install the shell-completion file
+	cp $(CURDIR)/shell-completion/bash $(CURDIR)/debian/ufw/usr/share/bash-completion/completions/ufw
+
+binary-arch: build
+
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs
+	dh_installchangelogs ChangeLog
+	dh_installdocs
+	dh_installdocs README
+	dh_installexamples doc/skel-ui.example
+	dh_install
+	dh_installinit --no-start --no-stop-on-upgrade
+	# don't start the service on on install/upgrade and don't stop the
+	# service on upgrade
+	dh_installsystemd --no-start --no-stop-on-upgrade --no-restart-on-upgrade
+	dh_installlogrotate
+	dh_installman
+	dh_installdebconf
+	dh_lintian
+
+	: # Replace all '#!' calls to python with $(PYTHON)
+	: # and make them executable
+	for i in `find debian -mindepth 3 -type f`; do \
+		sed '1s,#!.*python[^ ]*\(.*\),#! $(PYTHON)\1,' \
+			$$i > $$i.temp; \
+		if cmp --quiet $$i $$i.temp; then \
+			rm -f $$i.temp; \
+		else \
+			mv -f $$i.temp $$i; \
+			chmod 755 $$i; \
+			echo "fixed interpreter: $$i"; \
+		fi; \
+	done
+	# Don't install profiles on Ubuntu
+	if dpkg-vendor --is ubuntu; then \
+		rm -f $(CURDIR)/debian/ufw/etc/ufw/applications.d/ufw-* ; \
+	fi
+	dh_python3 -p ufw
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary install
