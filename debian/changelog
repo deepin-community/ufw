@@ -1,8 +1,108 @@
-ufw (0.36.1-4) UNRELEASED; urgency=medium
+ufw (0.36.2-9) unstable; urgency=medium
 
-  * update
+  * 0008-fix-tests-with-python313.path: (Closes: 1092511)
 
- -- Jamie Strandboge <jdstrand@ubuntu.com>  Tue, 31 May 2022 11:13:24 +0800
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Mon, 20 Jan 2025 15:35:18 +0000
+
+ufw (0.36.2-8) unstable; urgency=medium
+
+  * debian/control: update Vcs for branch rename
+  * 0006-update-ufw-framework.patch: mention incus
+  * 0007-clarify-enable-force.patch: mention --force earlier
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Mon, 04 Nov 2024 11:46:13 +0000
+
+ufw (0.36.2-7) unstable; urgency=medium
+
+  * debian/control: Depends on procps (Closes: 1084773)
+  * 0005-add-lxd-to-manpage.patch: mention how to allow ufw and LXD to work
+    well together
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Sun, 20 Oct 2024 19:05:50 +0000
+
+ufw (0.36.2-6) unstable; urgency=medium
+
+  * debian/control: Build-Depends on python3-setuptools instead of
+    python3-distutils (Closes: 1065992)
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Mon, 11 Mar 2024 13:18:21 +0000
+
+ufw (0.36.2-5) unstable; urgency=medium
+
+  [ Helmut Grohne ]
+  * Install aliased files to /usr. (Closes: #1063695)
+
+  [ Jamie Strandboge ]
+  * debian/config
+    - remove ancient check for /var/lib/ufw
+    - set USER_PATH to /etc/ufw (user*.rules have been in /etc since 0.35-1
+      which broke the has_existing() check)
+  * debian/ufw.postinst: remove no longer needed OLD_USER_PATH migration from
+    /lib/ufw to /etc/ufw (user*.rules have been in /etc since 0.35-1)
+  * debian/ufw.postrm: remove no longer needed OLD_USER_PATH removal from
+    /lib/ufw (user*.rules have been in /etc since 0.35-1)
+  * debian/ufw.prerm: /lib/ufw -> /usr/lib/ufw
+  * debian/ufw.init: /lib/ufw -> /usr/lib/ufw
+  * debian/ufw.service: /lib/ufw -> /usr/lib/ufw
+  * debian/tests/test-ufw.py: /lib/ufw -> /usr/lib/ufw
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Tue, 13 Feb 2024 15:04:38 +0000
+
+ufw (0.36.2-4) unstable; urgency=medium
+
+  * debian/test/control: install python3-setuptools instead of
+    python3-distutils (LP: #2051540)
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Sat, 10 Feb 2024 23:34:53 +0000
+
+ufw (0.36.2-3) unstable; urgency=medium
+
+  * 0003-fix-syntax-warnings-with-python312.patch: fix syntax warnings from
+    python 3.12
+  * 0004-fix-manpage-font.patch: adjust doc/ufw.8 to properly use bold font
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Wed, 31 Jan 2024 23:44:31 +0000
+
+ufw (0.36.2-2) unstable; urgency=medium
+
+  * 0002-fix-tests-with-python312.patch: tests/unit: update to use assertEqual
+    for python 3.12 (LP: #2051540, Closes: 1061763)
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Wed, 31 Jan 2024 14:22:06 +0000
+
+ufw (0.36.2-1) unstable; urgency=medium
+
+  * New upstream release (LP: #1946804, LP: #1927737, LP: #1927734,
+    LP: #2015645, LP: #1996636, LP: #1965462, LP: #1951018, Closes: 1034568,
+    Closes: 1034119). Drop the following (included upstream):
+    - 0002-fix-copyright.patch
+    - 0003-python3-versions.patch
+    - 0004-set-default-policy-after-load.patch
+  * Remaining changes:
+    - 0001-optimize-boot.patch
+  * add new debian/po/ro.po. Thanks Remus-Gabriel Chelu (Closes: 1033758)
+  * debian/control:
+    - Breaks with iptables-persistent and netfilter-persistent. When ufw is
+      installed, it is not enabled by default, so it doesn't interfere with
+      other firewall software (until it is enabled). In contrast,
+      iptables-persistent and netfilter-persistent install enabled, which
+      interferes with ufw. Add a breaks on these to avoid them being
+      co-installed with ufw (and causing problems for users).
+    - use Python-Version instead of XB-Python-Version
+    - remove Depends on obsolete lsb-base
+  * ufw.lintian-overrides:
+    - update for breaks-without-version iptables-persistent and
+      netfilter-persistent
+    - update for newer lintian
+
+ -- Jamie Strandboge <jdstrand@ubuntu.com>  Thu, 18 May 2023 14:03:07 +0000
+
+ufw (0.36.1-4.1) unstable; urgency=medium
+
+  * Non-maintainer upload.
+  * No source change upload to rebuild with debhelper 13.10.
+
+ -- Michael Biebl <biebl@debian.org>  Sat, 15 Oct 2022 12:54:27 +0200
 
 ufw (0.36.1-4) unstable; urgency=medium
 
